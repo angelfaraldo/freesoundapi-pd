@@ -1,0 +1,214 @@
+#N canvas 566 179 970 494 12;
+#X msg 182 164 next;
+#X msg 154 139 previous;
+#X obj 27 301 freesound-search;
+#X msg 163 271 token <YOUR-API-KEY>;
+#N canvas 528 49 1238 915 search-text 0;
+#X text 338 20 QUERY;
+#X obj 21 784 s \$0-requests;
+#X text 148 780 & must be together with filter (&filter). Si está
+separado \, no funciona... de la misma manera \, la = debe estar junta
+a la palabra;
+#X text 339 293 you can add as many filters as you want separated by
+spaces...;
+#X text 336 191 FILTER;
+#X text 334 214 Search results can be filtered by specifying a series
+of properties that sounds should match. In other words \, using the
+filter parameter you can specify the value that certain sound fields
+should have in order to be considered valid search results. Filters
+are defined with a syntax like filter=fieldname:value fieldname:value
+(that is the Solr filter syntax). Use double quotes for multi-word
+queries (filter=fieldname:"val ue"). Filter names can be any of the
+following:, f 102;
+#X text 339 43 The query is the main parameter used to define a query.
+Query terms are specified You can type several terms separated by spaces
+or phrases wrapped inside quote ‘”’ characters. For every term
+\, you can also use ‘+’ and ‘-‘ modifier characters to indicate
+that a term is “mandatory” or “prohibited” (by default \, terms
+are considered to be “mandatory”). For example \, in a query such
+as query=term_a -term_b \, sounds including term_b will not match the
+search criteria. The query does a weighted search over some sound properties
+including sound tags \, the sound name \, its description \, pack name
+and the sound id. Therefore \, searching for query=123 will find you
+sounds with id 1234 \, sounds that have 1234 in the description \,
+in the tags \, etc. Using an empty query (query= or query="") will
+return all Freesound sounds., f 102;
+#X text 154 935 por alguna razón si se separa el signo igual del query
+no funciona igual que si está junto... ¿cual es el correcto?. Sin
+embargo \, el espacio de despues es irrelevante. tal vez reformatearlo
+de modo que, f 96;
+#X text 148 844 TODO GEOTAGGING;
+#X text 152 878 eliminar el igual y el & de la sintaxis... para pd-izarlo
+más... con eso \, creo que nos queda una api muy maja!;
+#X msg 53 685 search text query "bass drum" bombo kick filter username:gis_sweden
+&filter= tag:eurorack id:[389151 TO 389155], f 71;
+#X msg 30 73 search text query bass drum;
+#X msg 41 103 search query "bass drum";
+#X msg 51 133 search text query "bass drum" -kick;
+#X text 400 1051 Hacer que la "?" del query sea independiente de la
+orden (query \, filter \, etc...) y todas las demás vengan precedidas
+de "&" de ese modo \, podemos combinar todos los comandos en cualquier
+formqa;
+#X msg 53 599 search text -query -filter channels:4, f 71;
+#X msg 70 555 sounds 12345, f 71;
+#X msg 21 43 search text -query bass;
+#X msg 339 342 id username created original_filename description tag
+license is_remix was_remixed pack pack_tokenized is_geotagged type
+duration bitdepth bitrate samplerate filesize channels md5 num_downloads
+avg_ratings num_ratings comment comments, f 97;
+#X msg 339 402 ac_loudness ac_dynamic_range ac_temporal_centroid ac_log_attack_time
+ac_single_event ac_tonality ac_tonality_confidence ac_loop ac_tempo
+ac_tempo_confidence ac_note_midi ac_note_name ac_note_frequency ac_note_confidence
+ac_brightness ac_depth ac_hardness ac_roughness ac_boominess ac_warmth
+ac_sharpness ac_reverb, f 97;
+#X connect 10 0 1 0;
+#X connect 11 0 1 0;
+#X connect 12 0 1 0;
+#X connect 13 0 1 0;
+#X connect 15 0 1 0;
+#X connect 16 0 1 0;
+#X connect 17 0 1 0;
+#X restore 24 20 pd search-text;
+#X obj 27 139 r \$0-requests;
+#X text 230 136 Once you have made a request \, you can navigate the
+results through consecutive pages., f 32;
+#X text 319 270 In order to start using the Freesound APIv2 you’ll
+need an API credential that you can request in https://freesound.org/apiv2/apply.
+Basic API calls can be authenticated using a typical api key mechanism
+in which you’ll need to add the key given with your APIv2 credential
+into every request you make. Get your API token and send it with the
+"token" method as a configuration parameter., f 72;
+#N canvas 0 23 450 300 search-combined 0;
+#X restore 24 80 pd search-combined;
+#N canvas 0 23 663 300 search-content 0;
+#X msg 36 92 /search/content/?target=1245;
+#X msg 50 118 /search/content/?descriptors_filter=lowlevel.pitch.mean:[219.9%20TO%20220.1]
+, f 76;
+#X msg 65 145 /search/combined/?filter=tag:loop&descriptors_filter=rhythm.bpm:[119%20TO%20121]
+, f 81;
+#X msg 11 42 /search/text/?query=mosca;
+#X msg 25 66 /search/text/?query=city&filter=tag:barcelona;
+#X text 9 15 DELETE WHEN PROPERLY IMPLEMENTED!!!!;
+#X obj 31 215 s \$0-requests;
+#X connect 0 0 6 0;
+#X connect 1 0 6 0;
+#X connect 2 0 6 0;
+#X connect 3 0 6 0;
+#X connect 4 0 6 0;
+#X restore 24 50 pd search-content;
+#N canvas 469 214 885 590 pagination 0;
+#X msg 84 412 format json;
+#X msg 597 139 score;
+#X msg 607 169 duration_desc;
+#X msg 617 199 duration_asc;
+#X msg 627 229 created_desc;
+#X msg 637 259 created_asc;
+#X msg 647 289 downloads_desc;
+#X msg 657 319 downloads_asc;
+#X msg 667 349 rating_desc;
+#X msg 677 380 rating_asc;
+#X text 644 139 (default);
+#X msg 597 457 sort \$1;
+#X obj 597 432 symbol;
+#X text 597 98 you can have your results sorted according to different
+criteria, f 37;
+#X msg 69 186 group_by_pack \$1;
+#X obj 69 166 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 0
+1;
+#X floatatom 51 101 5 1 150 0 - - -;
+#X msg 28 43 page \$1;
+#X floatatom 28 20 5 0 0 0 - - -;
+#X msg 51 127 page_size \$1;
+#X obj 31 534 outlet;
+#X text 180 408 although the freesound api can return the query results
+in various formats (json \, xml \, yaml) \, this implementation will
+ONLY WORKS with json format., f 53;
+#X text 76 212 If group_by_pack=1 and search results contain more than
+one sound that belongs to the same pack \, only one sound for each
+distinct pack is returned (sounds with no packs are returned as well).
+Defaults to 0;
+#X text 76 280 NOT IMPLEMENTED YET: The returned sound will feature
+two extra properties to access these other sounds omitted from the
+results list: "n_from_same_pack:" indicates how many other results
+belong to the same pack (and have not been returned) "more_from_same_pack":
+uri pointing to the list of omitted sound results of the same pack
+(also including the result which has already been returned).;
+#X text 100 89 maximum number of results per page (max 150!!!). Defaults
+to 3, f 49;
+#X text 95 14 results from the freesound API is organised and returned
+as pages \, with the maximum number of results per page specified with
+the "page_size" method. Defaults to 1, f 53;
+#X connect 0 0 20 0;
+#X connect 1 0 12 0;
+#X connect 2 0 12 0;
+#X connect 3 0 12 0;
+#X connect 4 0 12 0;
+#X connect 5 0 12 0;
+#X connect 6 0 12 0;
+#X connect 7 0 12 0;
+#X connect 8 0 12 0;
+#X connect 9 0 12 0;
+#X connect 11 0 20 0;
+#X connect 12 0 11 0;
+#X connect 14 0 20 0;
+#X connect 15 0 14 0;
+#X connect 16 0 19 0;
+#X connect 17 0 20 0;
+#X connect 18 0 17 0;
+#X connect 19 0 20 0;
+#X restore 136 221 pd pagination and sorting;
+#N canvas 841 93 695 807 fields 1;
+#X obj 47 766 outlet;
+#X msg 113 729 normalized \$1;
+#X obj 114 706 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 0
+1;
+#X msg 47 92 fields id name tags username license;
+#X text 316 94 (default settings);
+#X msg 72 167 id url name tags description geotag created license type
+channels filesize bitrate bitdepth duration samplerate username pack
+download bookmark previews images num_downloads avg_rating num_ratings
+rate comments comment similar_sounds analysis analysis_stats analysis_frames
+ac_analysis;
+#X msg 94 308 fields id name type channels samplerate bitdepth bitrate
+duration, f 66;
+#X text 44 18 FIELDS;
+#X text 118 414 DESCRIPTORS;
+#X text 221 725 indicates whether the returned sound content-based
+descriptors should be normalized or not.;
+#X text 44 43 The method "fields" indicates which sound properties
+should be included and returned in every sound of the response.;
+#X text 68 125 the fields sound properties can be any combination of
+the following. They must be separated spaces after the "fields" method.
+, f 67;
+#X text 118 542 https://freesound.org/docs/api/analysis_docs.html#analysis-docs
+, f 69;
+#X text 117 432 The field property "analysis" can be determined using
+an additional request parameter "descriptors". This method should include
+a space separated list of content-based descriptor names \, indicating
+which sound content-based descriptors should be included in every sound
+of the response. This parameter will have no effect if analysis property
+is not included in the fields request parameter. Descriptor names can
+be any combination of those listed in the following link \, separated
+by spaces:, f 76;
+#X msg 120 573 fields id analysis \, descriptors lowlevel.spectral_centroid
+lowlevel.barkbands.mean, f 62;
+#X text 130 618 this response will include \, for every returned sound
+\, all statistics of the spectral centroid descriptor and the mean
+of the barkbands. Descriptor values are included in the response inside
+the analysis sound property.;
+#X msg 74 275 fields id avg_ratings license analysis;
+#X connect 1 0 0 0;
+#X connect 2 0 1 0;
+#X connect 3 0 0 0;
+#X connect 6 0 0 0;
+#X connect 14 0 0 0;
+#X connect 16 0 0 0;
+#X restore 145 246 pd fields and descriptors;
+#X msg 184 378 fields id;
+#X connect 0 0 2 0;
+#X connect 1 0 2 0;
+#X connect 3 0 2 1;
+#X connect 5 0 2 0;
+#X connect 10 0 2 1;
+#X connect 11 0 2 1;
+#X connect 12 0 2 1;
